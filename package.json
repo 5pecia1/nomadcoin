@@ -6,5 +6,8 @@
   "repository": "https://github.com/5pecia1/nomadcoin.git",
   "author": "5pecia1 <pdpxpd@gmail.com>",
   "license": "MIT",
-  "private": false
+  "private": false,
+  "dependencies": {
+    "crypto-js": "^3.1.9-1"
+  }
 }
