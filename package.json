@@ -1,0 +1,10 @@
+{
+  "name": "nomadcoin",
+  "version": "1.0.0",
+  "description": "good coin",
+  "main": "src/server.js",
+  "repository": "https://github.com/5pecia1/nomadcoin.git",
+  "author": "5pecia1 <pdpxpd@gmail.com>",
+  "license": "MIT",
+  "private": false
+}
