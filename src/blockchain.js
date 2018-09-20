@@ -40,7 +40,7 @@ const createNewBlock = data => {
         newTimeStamp,
         data
     );
-
+    addBlcokToChain(newBlock);
     return newBlock;
 };
 
@@ -106,3 +106,8 @@ const addBlcokToChain = newBlock => {
         return false;
     }
 };
+
+module.exports = {
+    getBlockChain,
+    createNewBlock
+}
