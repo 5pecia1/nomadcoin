@@ -3,7 +3,12 @@ const WebSockets = require("ws"),
 
 const sockets = [];
 
-const { getLastBlock } = Blockchain;
+const { 
+    getBlockchain, 
+    getNewestBlock, 
+    isBlockStructureVaild, 
+    addBlcokToChain, 
+    replaceChain } = Blockchain;
 
 const getSockets = () => sockets;
 
@@ -20,7 +25,7 @@ const getLatest = () => {
     };
 };
 
-const getALL = () => {
+const getAll = () => {
     return {
         type: GET_ALL,
         data: null
@@ -29,7 +34,7 @@ const getALL = () => {
 
 const blockchainResponse = data => {
     return {
-        typs: BLOCKCHAIN_RESPONSE,
+        type: BLOCKCHAIN_RESPONSE,
         data
     };
 };
@@ -47,7 +52,7 @@ const initSocketConnection = ws => {
     sockets.push(ws);
     handleSocketMessages(ws);
     handleSocketError(ws);
-    sendMessage(ws, getLastBlock());
+    sendMessage(ws, getLatest());
 };
 
 const parseData = data => {
@@ -68,13 +73,52 @@ const handleSocketMessages = ws => {
         console.log(message);
         switch(message.type) {
             case GET_LATEST:
-                sendMessage(ws, getLastBlock());
+                sendMessage(ws, responseLatest());
+                break;
+            case GET_ALL:
+                sendMessage(ws, responseAll());
+                break;
+
+            case BLOCKCHAIN_RESPONSE:
+                const receivedBlocks = message.data
+                if (receivedBlocks === null) {
+                    break;
+                }
+                handleBlockchainResponse(receivedBlocks)
                 break;
         }
     });
 };
 
+const handleBlockchainResponse = receivedBlocks => {
+    if (receivedBlocks.length === 0) {
+        console.log("Received blocks have a length of 0");
+        return ;
+    }
+    const latestBlockRecieved = receivedBlocks[receivedBlocks.length - 1];
+    if (!isBlockStructureVaild(latestBlockRecieved)) {
+        console.log("The block chain structure of the block reviced is not vaild");
+        return;
+    }
+    const newestBlock = getNewestBlock();
+    if (latestBlockRecieved.index > newestBlock.index) {
+        if (newestBlock.hash === latestBlockRecieved.previousHash) {
+            addBlcokToChain(latestBlockRecieved);
+        } else if (receivedBlocks.length === 1) {
+            sendMessageToAll(getAll())
+        } else {
+            replaceChain(receivedBlocks);
+        }
+    }
+};
+
 const sendMessage = (ws, message) => ws.send(JSON.stringify(message));
+
+const sendMessageToAll = message => sockets.forEach(ws => sendMessage(ws, message))
+
+const responseLatest = () => blockchainResponse([getNewestBlock()])
+
+const responseAll = () => blockchainResponse(getBlockchain())
 
 const handleSocketError = ws => {
     const closeSocketConnection = ws => {
